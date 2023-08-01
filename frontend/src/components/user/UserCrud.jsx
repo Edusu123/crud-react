@@ -1,47 +1,101 @@
-import React, { Component } from "react"
-import axios from 'axios'
-import Main from '../template/Main'
+import React, { Component } from "react";
+import axios from "axios";
+import Main from "../template/Main";
 
-const baseUrl = 'http://localhost:3001/users'
+const baseUrl = "http://localhost:3001/users";
 const headerProps = {
-    icon: 'users',
-    title: 'Usuários',
-    subtitle: 'Cadastro de usuários: Incluir, Listar, Alterar e Excluir!'
-}
+  icon: "users",
+  title: "Usuários",
+  subtitle: "Cadastro de usuários: Incluir, Listar, Alterar e Excluir!",
+};
 const initialState = {
-    user: { name: '', email: '' },
-    list: []
-}
+  user: { name: "", email: "" },
+  list: [],
+};
 
-export default class UserCrud extends Component{
+export default class UserCrud extends Component {
+  state = { ...initialState };
 
-    clear() {
-        this.setState({user: initialState.user})
-    }
+  clear() {
+    this.setState({ user: initialState.user });
+  }
 
-    getUpdatedList(newUser){
-        const list = this.state.list.filter(u => u.id !== newUser.id)
-        list.unshift(user)
-        return list
-    }
+  getUpdatedList(newUser) {
+    const list = this.state.list.filter((u) => u.id !== newUser.id);
+    list.unshift(newUser);
+    return list;
+  }
 
-    render(){
-        return (
-            <Main {...headerProps}>
-                Cadastro de Usuário
-            </Main>
-        )
-    }
+  render() {
+    return <Main {...headerProps}>{this.renderForm()}</Main>;
+  }
 
-    save() {
-        const user = this.state.user
-        const method = user.id ? 'put' : 'post'
-        const url = user.id ? `${baseUrl}/${user.id}` : baseUrl
+  renderForm() {
+    return (
+      <div className="form">
+        <div className="row">
+          <div className="col-12 col-md-6">
+            <div className="form-group">
+              <label>Nome</label>
+              <input
+                type="text"
+                className="form-control"
+                name="name"
+                value={this.state.user.name}
+                onChange={(e) => this.updateField(e)}
+                placeholder="Digite o nome..."
+              />
+            </div>
+          </div>
 
-        axios[method](url, user)
-            .then(resp => {
-                const list = this.getUpdatedList(resp.data)
-                this.setState({user: initialState.user, list})
-            });
-    }
+          <div className="col-12 col-md-6">
+            <div className="form-group">
+              <label>E-mail</label>
+              <input
+                type="text"
+                className="form-control"
+                name="email"
+                value={this.state.user.email}
+                onChange={(e) => this.updateField(e)}
+                placeholder="Digite o e-mail..."
+              />
+            </div>
+          </div>
+        </div>
+
+        <hr />
+        <div className="row">
+          <div className="col-12 d-flex justify-content-end">
+            <button className="btn btn-primary" onClick={(e) => this.save(e)}>
+              Salvar
+            </button>
+
+            <button
+              className="btn btn-secondary ml-2"
+              onClick={(e) => this.clear(e)}
+            >
+              Cancelar
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  save() {
+    const user = this.state.user;
+    const method = user.id ? "put" : "post";
+    const url = user.id ? `${baseUrl}/${user.id}` : baseUrl;
+
+    axios[method](url, user).then((resp) => {
+      const list = this.getUpdatedList(resp.data);
+      this.setState({ user: initialState.user, list });
+    });
+  }
+
+  updateField(event) {
+    const user = { ...this.state.user };
+    user[event.target.name] = event.target.value;
+    this.setState({ user });
+  }
 }
